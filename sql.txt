@@ -1,0 +1,33 @@
+1. Ќовые торговые точки
+
+SELECT MONTH(purchase_date) as month, COUNT(client_id) AS clients FROM orders x
+WHERE MONTH(purchase_date) = 
+(SELECT MIN(MONTH(purchase_date)) FROM orders y WHERE x.client_id = y.client_id)
+GROUP BY MONTH(purchase_date);
+
+2. “орговые точки, сделавшие заказ в прошлом мес€це и в этом
+
+SELECT MONTH(purchase_date) as month, Count(client_id) AS clients FROM orders x
+WHERE client_id IN
+(SELECT client_id FROM orders y 
+WHERE (MONTH(y.purchase_date) = MONTH(x.purchase_date) -1) and x.client_id = y.client_id)
+group by MONTH(purchase_date);
+
+3. “орговые точки, которые когда-то что-то заказали(только не в прошлом мес€це) и вернувшиес€.
+
+SELECT MONTH(purchase_date) as month, Count(client_id) AS clients FROM orders x
+WHERE client_id IN
+(SELECT client_id FROM orders y 
+WHERE (x.client_id = y.client_id) AND (MONTH(y.purchase_date) < (MONTH(x.purchase_date) - 1)))
+GROUP BY MONTH(purchase_date);
+
+4. “орговые точки, отвалившиес€ в этом мес€це.
+
+SELECT MONTH(purchase_date)+1 as month, Count(client_id) AS clients FROM orders x
+WHERE (client_id NOT IN
+(SELECT client_id FROM orders y 
+WHERE MONTH(y.purchase_date) = (MONTH(x.purchase_date) + 1)))
+AND 
+((SELECT COUNT(client_id) FROM orders y 
+WHERE MONTH(y.purchase_date) = (MONTH(x.purchase_date) + 1)) > 0)
+GROUP BY MONTH(purchase_date);
